@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BookQuest Admin Panel</title>
+
+<style>
+body {
+  font-family: Inter, sans-serif;
+  background:#0f172a;
+  color:white;
+  margin:0;
+  padding:40px;
+}
+
+.container {
+  max-width:900px;
+  margin:auto;
+}
+
+h1 {
+  background: linear-gradient(135deg,#7c3aed,#06b6d4,#f97316);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.card {
+  background:rgba(255,255,255,0.06);
+  padding:25px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,0.1);
+  margin-top:20px;
+}
+
+.dropzone {
+  border:2px dashed #06b6d4;
+  padding:40px;
+  text-align:center;
+  margin-top:20px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.preview {
+  font-size:40px;
+  margin-top:10px;
+}
+
+button {
+  padding:12px 20px;
+  border:none;
+  background:linear-gradient(135deg,#7c3aed,#06b6d4,#f97316);
+  color:white;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:15px;
+  font-weight:600;
+}
+
+input {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+}
+
+textarea {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  resize:none;
+}
+
+.book-item {
+  padding:10px;
+  background:#111827;
+  margin-top:10px;
+  border-radius:10px;
+}
+
+/* preview card */
+.preview-card {
+  margin-top:15px;
+  padding:12px;
+  border-radius:12px;
+  background:#111827;
+  border:1px solid rgba(255,255,255,0.08);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>BookQuest Admin Panel</h1>
+
+  <!-- IMAGE UPLOAD -->
+  <div class="card">
+    <h2>Upload Ad Image (Drag & Drop)</h2>
+
+    <div class="dropzone" id="dropzone">
+      Drop image here or click to upload
+      <div class="preview" id="preview">📁</div>
+    </div>
+  </div>
+
+  <!-- AD CREATION (MAIN SYSTEM) -->
+  <div class="card">
+    <h2>Create Advertisement</h2>
+
+    <input id="adTitle" placeholder="Book Title"/>
+    <input id="adPrice" placeholder="Price (e.g $5)"/>
+    <textarea id="adDesc" placeholder="Description"></textarea>
+
+    <button onclick="addAd()">Publish Advertisement</button>
+
+    <div id="adList"></div>
+  </div>
+</div>
+
+<script>
+
+let uploadedImage = null;
+
+/* =========================
+   DRAG & DROP IMAGE
+========================= */
+
+const dropzone = document.getElementById("dropzone");
+
+dropzone.addEventListener("dragover", e => e.preventDefault());
+
+dropzone.addEventListener("drop", e => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    uploadedImage = ev.target.result;
+    document.getElementById("preview").innerText = "✔ Image Ready";
+  };
+  reader.readAsDataURL(file);
+});
+
+
+/* =========================
+   SAVE AD (CORE SYSTEM)
+========================= */
+
+function addAd(){
+
+  const title = document.getElementById("adTitle").value;
+  const price = document.getElementById("adPrice").value;
+  const desc = document.getElementById("adDesc").value;
+
+  if(!title || !price || !desc || !uploadedImage){
+    return alert("Fill all fields + upload image");
+  }
+
+  const ad = {
+    title,
+    price,
+    desc,
+    image: uploadedImage
+  };
+
+  let ads = JSON.parse(localStorage.getItem("bookquest_ads") || "[]");
+
+  ads.push(ad);
+
+  localStorage.setItem("bookquest_ads", JSON.stringify(ads));
+
+  render();
+
+  alert("Advertisement Published Successfully 🚀");
+}
+
+
+/* =========================
+   LIVE ADMIN PREVIEW
+========================= */
+
+function render(){
+
+  let ads = JSON.parse(localStorage.getItem("bookquest_ads") || "[]");
+
+  document.getElementById("adList").innerHTML =
+    ads.map(a => `
+      <div class="preview-card">
+        <b>${a.title}</b> - ${a.price}
+        <p style="color:#94a3b8">${a.desc}</p>
+      </div>
+    `).join("");
+}
+
+render();
+
+</script>
+
+</body>
+</html>
